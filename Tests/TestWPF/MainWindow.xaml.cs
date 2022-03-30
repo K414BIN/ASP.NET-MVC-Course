@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Windows.Controls;
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
@@ -16,13 +17,11 @@ namespace TestWPF
         public MainWindow()
         {
             InitializeComponent();
-          
-            
+     
             Dispatcher.Invoke(() => Title = "Time to start program " + DateTime.Now.ToString());
 
         }
 
-       
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             /* Я попытался запустить несколько потоков и для каждого создал свой TextBox */
@@ -37,11 +36,9 @@ namespace TestWPF
             var threads_list = new List<Thread>();
 
             Thread[] thread = new Thread[textBoxes.Length];
-            /* При такой записи цикла for (var i = 0; i < thread.Length; ++i) валится с ошибкой "Index was outside the bounds of the array" => textBoxes[i].Text */
-            /* не смог отследить в чем дело. */
-            for (var i = 0; i < thread.Length - 1 ;++i) { 
-
-            thread[i] = new Thread(() =>
+            
+            for (int i = thread.Length - 1; i > 0; i--) { 
+                    thread[i] = new Thread(() =>
             {
               
                     this.Dispatcher.BeginInvoke(() =>
@@ -53,7 +50,7 @@ namespace TestWPF
                     var result = thread_id.ToString() + " " +fib(21).ToString()+" "+ DateTime.Now.ToString("HH:mm:ss") + Environment.NewLine; ;
                     auto_event.WaitOne();
                     textBoxes[i].Text = result;
-                    auto_event.Reset();
+                    
                 });
                                      
             });
@@ -66,9 +63,14 @@ namespace TestWPF
             /* Запуск всех потоков  из списка */
             foreach (var threads in threads_list) 
             {   
+                    /* Создание Event запуск и остановка  таймера */
+                    var timer = Stopwatch.StartNew();   
                     threads.Start();    
                     Thread.Sleep(Timeout);
                     auto_event.Set();
+                    /* Создание Event остановка timer */
+                    /* Не сработало */
+                    timer.Stop();
             }
                     
         }
