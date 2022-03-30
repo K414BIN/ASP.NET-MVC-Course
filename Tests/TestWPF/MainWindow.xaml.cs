@@ -16,14 +16,19 @@ namespace TestWPF
         {
             InitializeComponent();
             Dispatcher.Invoke(() => Title = "Time to start program " + DateTime.Now.ToString());
+            MyEventsAndThreads();
         }
 
         private static readonly object __SyncRoot = new object();
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            MyEventsAndThreads();
+        }
+        private void MyEventsAndThreads()
+        {
             /* Я попытался запустить несколько потоков и для каждого создал свой TextBox */
-            /* Однако работает только один. Я что-то сделал неправильно, подскажите, пожайлуста, что? */
+            /* Однако работает только один. Я что-то сделал неправильно, подскажите, пожалуйста, что? */
 
             TextBox[]  textBoxes = { TextBox1,TextBox2,TextBox3,TextBox4,TextBox5 };
             
@@ -32,19 +37,26 @@ namespace TestWPF
             var threads_list = new List<Thread>();
 
             Thread[] thread = new Thread[textBoxes.Length];
+            
+            var auto_event = new AutoResetEvent(false);
 
-            for (int i = thread.Length - 1; i > 0; i--) { 
+            for (int i = thread.Length - 1; i >=0; i--) { 
 
             thread[i] = new Thread(() =>
             {
-                lock   (__SyncRoot) { 
+              
                 Application.Current.Dispatcher.BeginInvoke(() =>
                 {
-                    var result = "\n" + Thread.CurrentThread.ManagedThreadId.ToString() + " " + Thread.CurrentThread.ThreadState.ToString() +" " + DateTime.Now.ToString();
-                     textBoxes[i].Text = result;
-                                
+
+                    var thread_id = Environment.CurrentManagedThreadId;
+            
+                    var result = thread_id.ToString()+" " + DateTime.Now.ToString("HH: mm:ss: fff");
+                    auto_event.WaitOne();
+                    textBoxes[i].Text = result;
+                         
+                    auto_event.Reset(); 
                 });
-                }                     
+                                  
             });
             
 
@@ -56,6 +68,8 @@ namespace TestWPF
             {   
                     threads.Start();    
                     Thread.Sleep(Timeout);
+                     auto_event.Set();
+                    
             }
         }
     }
