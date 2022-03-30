@@ -18,17 +18,11 @@ namespace TestWPF
             InitializeComponent();
           
             
-            Dispatcher.Invoke(() => Title = "Time to start program " + __SyncTime.ToString());
+            Dispatcher.Invoke(() => Title = "Time to start program " + DateTime.Now.ToString());
 
         }
 
-        /* Создание объекта только для чтения для lock */
-        private static readonly object __SyncRoot = new object();
-
-        /* Создание объекта только для чтения для отчета секунд, когда запустится новый поток  */
-        /* Не понадобился, потому что потоки не переключаются у меня */
-        private static readonly DateTime __SyncTime = DateTime.Now;
-
+       
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             /* Я попытался запустить несколько потоков и для каждого создал свой TextBox */
@@ -37,25 +31,31 @@ namespace TestWPF
             TextBox[]  textBoxes = { TextBox1,TextBox2,TextBox3,TextBox4,TextBox5 };
             
             int Timeout = 500;
-            
+
+            var auto_event = new AutoResetEvent(false);
+
             var threads_list = new List<Thread>();
 
             Thread[] thread = new Thread[textBoxes.Length];
-
-            for (int i = thread.Length - 1; i > 0; i--) { 
+            /* При такой записи цикла for (var i = 0; i < thread.Length; ++i) валится с ошибкой "Index was outside the bounds of the array" => textBoxes[i].Text */
+            /* не смог отследить в чем дело. */
+            for (var i = 0; i < thread.Length - 1 ;++i) { 
 
             thread[i] = new Thread(() =>
             {
-                lock   (__SyncRoot)
-                { 
+              
                     this.Dispatcher.BeginInvoke(() =>
                 {
                     textBoxes[i].Text = string.Empty;
-                    var result =  Thread.CurrentThread.ManagedThreadId.ToString() + " " +fib(21).ToString()+" "+ DateTime.Now.ToString() + Environment.NewLine; ;
-                     textBoxes[i].Text = result;
-                                
+                    /* Я не уловил разници в этих переменных. Оставил ту,что показали на лекции */
+                    var thread_id = Environment.CurrentManagedThreadId;
+                    //var thread_id = Thread.CurrentThread.ManagedThreadId;
+                    var result = thread_id.ToString() + " " +fib(21).ToString()+" "+ DateTime.Now.ToString("HH:mm:ss") + Environment.NewLine; ;
+                    auto_event.WaitOne();
+                    textBoxes[i].Text = result;
+                    auto_event.Reset();
                 });
-                }                     
+                                     
             });
 
             thread[i].IsBackground = true;
@@ -68,6 +68,7 @@ namespace TestWPF
             {   
                     threads.Start();    
                     Thread.Sleep(Timeout);
+                    auto_event.Set();
             }
                     
         }
