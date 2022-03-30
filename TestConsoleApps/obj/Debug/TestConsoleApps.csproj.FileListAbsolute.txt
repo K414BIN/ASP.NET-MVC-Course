@@ -1,8 +1,0 @@
-C:\Users\akradioman3\source\repos\ASP_NET_MVC_GB\TestConsoleApps\bin\Debug\TestConsoleApps.exe.config
-C:\Users\akradioman3\source\repos\ASP_NET_MVC_GB\TestConsoleApps\bin\Debug\TestConsoleApps.exe
-C:\Users\akradioman3\source\repos\ASP_NET_MVC_GB\TestConsoleApps\bin\Debug\TestConsoleApps.pdb
-C:\Users\akradioman3\source\repos\ASP_NET_MVC_GB\TestConsoleApps\obj\Debug\TestConsoleApps.csproj.AssemblyReference.cache
-C:\Users\akradioman3\source\repos\ASP_NET_MVC_GB\TestConsoleApps\obj\Debug\TestConsoleApps.csproj.SuggestedBindingRedirects.cache
-C:\Users\akradioman3\source\repos\ASP_NET_MVC_GB\TestConsoleApps\obj\Debug\TestConsoleApps.csproj.CoreCompileInputs.cache
-C:\Users\akradioman3\source\repos\ASP_NET_MVC_GB\TestConsoleApps\obj\Debug\TestConsoleApps.exe
-C:\Users\akradioman3\source\repos\ASP_NET_MVC_GB\TestConsoleApps\obj\Debug\TestConsoleApps.pdb

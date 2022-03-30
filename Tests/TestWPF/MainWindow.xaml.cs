@@ -40,7 +40,7 @@ namespace TestWPF
             
             var auto_event = new AutoResetEvent(false);
 
-            for (int i = thread.Length - 1; i >=0; i--) { 
+            for (int i = thread.Length - 1; i >0; i--) { 
 
             thread[i] = new Thread(() =>
             {
