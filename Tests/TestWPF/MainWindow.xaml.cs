@@ -4,6 +4,7 @@ using System;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
+using System.Threading.Tasks;
 
 namespace TestWPF
 {
@@ -15,62 +16,65 @@ namespace TestWPF
         public MainWindow()
         {
             InitializeComponent();
-            Dispatcher.Invoke(() => Title = "Time to start program " + DateTime.Now.ToString());
-            MyEventsAndThreads();
+            CancelButton.IsEnabled = false; 
         }
 
-        private static readonly object __SyncRoot = new object();
+        private CancellationTokenSource? _ProcessingCancellation;
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private async void StartButton_Click(object sender, RoutedEventArgs e)
         {
-            MyEventsAndThreads();
+            if (sender is not Button StartButton) return;
+            var thread_id = Thread.CurrentThread.ManagedThreadId;
+
+            StartButton.IsEnabled = false;
+            CancelButton.IsEnabled = true;
+
+            IProgress<double> progress = new Progress<double>(p => ProgressInformer.Value = p * 100);
+
+            var cancellation_source = new CancellationTokenSource();
+
+            _ProcessingCancellation = cancellation_source;
+
+            try {
+                    var thread_id1 = Thread.CurrentThread.ManagedThreadId;
+                    var result = await  SomeImportantCalculationsAsync(20,progress,cancellation_source.Token).ConfigureAwait(true);    
+                    var thread_id2 = Thread.CurrentThread.ManagedThreadId;
+                    TextBlock.Text = result.ToString();
+            }
+            catch (OperationCanceledException )
+                {  
+                  progress.Report(0);
+                  TextBlock.Text = "Операция была отменена!";
+                }
+            StartButton.IsEnabled = true;
+            CancelButton.IsEnabled = false;
         }
-        private void MyEventsAndThreads()
+
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            /* Я попытался запустить несколько потоков и для каждого создал свой TextBox */
-            /* Однако работает только один. Я что-то сделал неправильно, подскажите, пожалуйста, что? */
+            _ProcessingCancellation?.Cancel();
+        }
 
-            TextBox[]  textBoxes = { TextBox1,TextBox2,TextBox3,TextBox4,TextBox5 };
-            
-            int Timeout = 500;
-            
-            var threads_list = new List<Thread>();
-
-            Thread[] thread = new Thread[textBoxes.Length];
-            
-            var auto_event = new AutoResetEvent(false);
-
-            for (int i = thread.Length - 1; i >0; i--) { 
-
-            thread[i] = new Thread(() =>
+        private async Task<DateTime> SomeImportantCalculationsAsync( int Timeout  = 100,IProgress<double> Progress = null,CancellationToken Cancel=default )
+        {
+          
+            Cancel.ThrowIfCancellationRequested();
+            const  int  counter = 100;
+            if ( Timeout > 0 )
             {
-              
-                Application.Current.Dispatcher.BeginInvoke(() =>
+                for (int i = 0; i < counter; i++)
                 {
-
-                    var thread_id = Environment.CurrentManagedThreadId;
-            
-                    var result = thread_id.ToString()+" " + DateTime.Now.ToString("HH: mm:ss: fff");
-                    auto_event.WaitOne();
-                    textBoxes[i].Text = result;
-                         
-                    auto_event.Reset(); 
-                });
-                                  
-            });
-            
-
-            thread[i].IsBackground = true;
-            threads_list.Add(thread[i]); 
+                    if (Cancel.IsCancellationRequested) { Cancel.ThrowIfCancellationRequested(); }
+                   
+                    await Task.Delay(Timeout).ConfigureAwait(false);
+                   
+                    Progress?.Report((double)i / counter);
+                }
             }
-
-            foreach (var threads in threads_list) 
-            {   
-                    threads.Start();    
-                    Thread.Sleep(Timeout);
-                     auto_event.Set();
-                    
-            }
-        }
+            Progress?.Report(1);
+            Cancel.ThrowIfCancellationRequested();
+          
+            return DateTime.Now;    
+        }  
     }
 }
