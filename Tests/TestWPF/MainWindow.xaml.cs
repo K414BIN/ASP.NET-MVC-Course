@@ -5,6 +5,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace TestWPF
 {
@@ -13,9 +14,15 @@ namespace TestWPF
     /// </summary>
     public partial class MainWindow : Window
     {
+        
         public MainWindow()
         {
             InitializeComponent();
+            // реализация порождающего паттерна Singleton
+            var fileName = $"DebugConsole[{DateTime.Now:yyyy-MM-ddTHH-mm-ss}].log";
+            var logger =   new FileLogger (fileName);              
+            logger.Log("Test");
+
             CancelButton.IsEnabled = false; 
         }
 
