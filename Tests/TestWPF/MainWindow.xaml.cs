@@ -25,7 +25,7 @@ namespace TestWPF
         {
             if (sender is not Button StartButton) return;
             var thread_id = Thread.CurrentThread.ManagedThreadId;
-
+            TextBlock.Text = String.Empty;
             StartButton.IsEnabled = false;
             CancelButton.IsEnabled = true;
 
