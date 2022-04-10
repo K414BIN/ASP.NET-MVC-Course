@@ -1,6 +1,9 @@
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
+using ASP_NET_MVC_GB;
 
-app.MapGet("/", () => "Hello World!");
+//var builder = WebApplication.CreateBuilder(args);
+//var app = builder.Build();
 
-app.Run();
+//app.MapGet("/", () => "Hello World!");
+
+//app.Run();
+ScannerContext.Run();
