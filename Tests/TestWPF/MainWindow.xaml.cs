@@ -37,23 +37,28 @@ namespace TestWPF
 
             Thread[] thread = new Thread[textBoxes.Length];
             
-            for (int i = thread.Length - 1; i > 0; i--) { 
-                    thread[i] = new Thread(() =>
-            {
+            for (int j = thread.Length - 1 ; j >= 0 ;j--) {
+
+                     int i = j;// Добавлена локальная переменная
+                     /* В 50% случаев запуска наблюдаю Dead Lock  - ЦП 0% активности всех процессов в окне диагностики */
+                     /* Отладить возникающую ошибку у меня не получается - мне не хватает знаний */
+                     thread[i] = new Thread(() =>
+                     {
               
-                    this.Dispatcher.BeginInvoke(() =>
-                {
-                    textBoxes[i].Text = string.Empty;
-                    /* Я не уловил разници в этих переменных. Оставил ту,что показали на лекции */
-                    var thread_id = Environment.CurrentManagedThreadId;
-                    //var thread_id = Thread.CurrentThread.ManagedThreadId;
-                    var result = thread_id.ToString() + " " +fib(21).ToString()+" "+ DateTime.Now.ToString("HH:mm:ss") + Environment.NewLine; ;
-                    auto_event.WaitOne();
-                    textBoxes[i].Text = result;
+                            this.Dispatcher.BeginInvoke(() =>
+                            {
+                  
+                                textBoxes[i].Text = string.Empty;
                     
-                });
+                                var thread_id = Environment.CurrentManagedThreadId;
+                    
+                                var result = thread_id.ToString() + " " +fib(21).ToString()+" "+ DateTime.Now.ToString("HH:mm:ss") + Environment.NewLine; ;
+                                auto_event.WaitOne();
+                                textBoxes[i].Text = result;
+                    
+                            });
                                      
-            });
+                     });
 
             thread[i].IsBackground = true;
             /* Добавляем в список поток */
