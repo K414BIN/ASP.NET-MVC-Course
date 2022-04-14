@@ -5,19 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestWPF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <Button Content="Start" HorizontalAlignment="Left" Margin="296,48,0,0" VerticalAlignment="Top" Width="74" Click="Button_Click"/>
-        <TextBox Name="TextBox1" HorizontalAlignment="Left" Margin="18,129,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="120"/>
-        <TextBox Name="TextBox2" HorizontalAlignment="Left" Margin="162,128,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="120"/>
-        <TextBox Name="TextBox3" HorizontalAlignment="Left" Margin="312,128,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="120"/>
-        <Label Content="Thread 1" Name="Label1" HorizontalAlignment="Left" Margin="18,92,0,0" VerticalAlignment="Top" Width="120" Height="27"/>
-        <Label Content="Thread 2" Name="Label2" HorizontalAlignment="Left" Margin="162,92,0,0" VerticalAlignment="Top" Width="120" Height="28"/>
-        <Label Content="Thread 3" Name="Label3" HorizontalAlignment="Left" Margin="312,93,0,0" VerticalAlignment="Top" Width="120" Height="27"/>
-        <TextBox Name="TextBox4" HorizontalAlignment="Left" Margin="450,128,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="120"/>
-        <Label Content="Thread 4" Name="Label4" HorizontalAlignment="Left" Margin="450,93,0,0" VerticalAlignment="Top" Width="120" Height="27"/>
-        <TextBox Name="TextBox5" HorizontalAlignment="Left" Margin="614,128,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="120"/>
-        <Label Content="Thread 5" Name="Label5" HorizontalAlignment="Left" Margin="614,93,0,0" VerticalAlignment="Top" Width="120" Height="27"/>
-
+        Title="MainWindow" Height="325" Width="800">
+    <Grid Height="323" VerticalAlignment="Top" Margin="0,0,147,0">
+        <TextBlock Name="TextBlock" HorizontalAlignment="Left" Margin="73,25,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="54" Width="663"/>
+        <Button Content="Start" Name="StartButton" HorizontalAlignment="Left" Margin="33,110,0,0" VerticalAlignment="Top" Height="52" Width="120" Click="StartButton_Click"/>
+        <Button Content="Cancel" Name ="CancelButton" HorizontalAlignment="Left" Margin="193,110,0,0" VerticalAlignment="Top" Height="52" Width="120" Click="CancelButton_Click"/>
+        <ProgressBar Name="ProgressInformer" HorizontalAlignment="Left" Height="10" Margin="33,231,0,0" VerticalAlignment="Top" Width="600"/>
     </Grid>
 </Window>
