@@ -25,6 +25,8 @@ public class EmployeesController : Controller
             return View(employees);
         }
 
+        public IActionResult Create() => View("Edit",new EmployeesViewModel());
+                       
         public IActionResult Details( int id)
         {
             var employee = _EmployeesStore.GetById(id); 
@@ -41,7 +43,7 @@ public class EmployeesController : Controller
     }
 
     [HttpPost]
-    public IActionResult Edit (EmployeesViewModel Model)
+    public IActionResult Edit(EmployeesViewModel Model)
     {
         var employee = new Employee
         {
@@ -80,8 +82,30 @@ public class EmployeesController : Controller
         });
     }
 
-    public IActionResult Delete(int id)
+    public IActionResult Delete(int? id)
+    {
+        if (id is null) return  NotFound();
+        var employee = _EmployeesStore.GetById((int)id);
+        if (employee is null) return NotFound();
+        return View(new EmployeesViewModel
+        {
+            Id = employee.Id,   
+            FirstName = employee.FirstName, 
+            LastName= employee.LastName,    
+            Patronymic= employee.Patronymic,        
+            Birthday= employee.Birthday,    
+        });
+    }
+    
+    [HttpPost]
+    public IActionResult DeleteConfirmed(EmployeesViewModel Model)
     {
         var employee = _EmployeesStore.GetById(id);
+        if (employee is null) return NotFound();
+         var success = _EmployeesStore.Edit(employee);
+        if (!success)    
+            return NotFound();
+        return RedirectToAction("Index");
     }
+   
 }
