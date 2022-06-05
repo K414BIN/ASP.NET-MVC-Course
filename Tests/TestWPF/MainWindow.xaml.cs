@@ -4,6 +4,8 @@ using System;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
+using System.Threading.Tasks;
+using System.IO;
 
 namespace TestWPF
 {
@@ -12,51 +14,74 @@ namespace TestWPF
     /// </summary>
     public partial class MainWindow : Window
     {
+        
         public MainWindow()
         {
             InitializeComponent();
-            Dispatcher.Invoke(() => Title = "Time to start program " + DateTime.Now.ToString());
+            // реализация порождающего паттерна Singleton
+            var fileName = $"DebugConsole[{DateTime.Now:yyyy-MM-ddTHH-mm-ss}].log";
+            var logger =   new FileLogger (fileName);              
+            logger.Log("Test");
+
+            CancelButton.IsEnabled = false; 
         }
 
-        private static readonly object __SyncRoot = new object();
+        private CancellationTokenSource? _ProcessingCancellation;
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private async void StartButton_Click(object sender, RoutedEventArgs e)
         {
-            /* Я попытался запустить несколько потоков и для каждого создал свой TextBox */
-            /* Однако работает только один. Я что-то сделал неправильно, подскажите, пожайлуста, что? */
+            if (sender is not Button StartButton) return;
+            var thread_id = Thread.CurrentThread.ManagedThreadId;
+            TextBlock.Text = String.Empty;
+            StartButton.IsEnabled = false;
+            CancelButton.IsEnabled = true;
 
-            TextBox[]  textBoxes = { TextBox1,TextBox2,TextBox3,TextBox4,TextBox5 };
-            
-            int Timeout = 500;
-            
-            var threads_list = new List<Thread>();
+            IProgress<double> progress = new Progress<double>(p => ProgressInformer.Value = p * 100);
 
-            Thread[] thread = new Thread[textBoxes.Length];
+            var cancellation_source = new CancellationTokenSource();
 
-            for (int i = thread.Length - 1; i > 0; i--) { 
+            _ProcessingCancellation = cancellation_source;
 
-            thread[i] = new Thread(() =>
-            {
-                lock   (__SyncRoot) { 
-                Application.Current.Dispatcher.BeginInvoke(() =>
-                {
-                    var result = "\n" + Thread.CurrentThread.ManagedThreadId.ToString() + " " + Thread.CurrentThread.ThreadState.ToString() +" " + DateTime.Now.ToString();
-                     textBoxes[i].Text = result;
-                                
-                });
-                }                     
-            });
-            
-
-            thread[i].IsBackground = true;
-            threads_list.Add(thread[i]); 
+            try {
+                    var thread_id1 = Thread.CurrentThread.ManagedThreadId;
+                    var result = await  SomeImportantCalculationsAsync(20,progress,cancellation_source.Token).ConfigureAwait(true);    
+                    var thread_id2 = Thread.CurrentThread.ManagedThreadId;
+                    TextBlock.Text = result.ToString();
             }
-
-            foreach (var threads in threads_list) 
-            {   
-                    threads.Start();    
-                    Thread.Sleep(Timeout);
-            }
+            catch (OperationCanceledException )
+                {  
+                  progress.Report(0);
+                  TextBlock.Text = "Операция была отменена!";
+                }
+            StartButton.IsEnabled = true;
+            CancelButton.IsEnabled = false;
         }
+
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            _ProcessingCancellation?.Cancel();
+        }
+
+        private async Task<DateTime> SomeImportantCalculationsAsync( int Timeout  = 100,IProgress<double> Progress = null,CancellationToken Cancel=default )
+        {
+          
+            Cancel.ThrowIfCancellationRequested();
+            const  int  counter = 100;
+            if ( Timeout > 0 )
+            {
+                for (int i = 0; i < counter; i++)
+                {
+                    if (Cancel.IsCancellationRequested) { Cancel.ThrowIfCancellationRequested(); }
+                   
+                    await Task.Delay(Timeout).ConfigureAwait(false);
+                   
+                    Progress?.Report((double)i / counter);
+                }
+            }
+            Progress?.Report(1);
+            Cancel.ThrowIfCancellationRequested();
+          
+            return DateTime.Now;    
+        }  
     }
 }
